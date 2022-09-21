@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "GRPC-template/gRPC";
+
+package gRPC;
+
+//compile command
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative [path to file, ex. proto/template.proto]
+
+
+//Increment method which sends an amount and recieves an ackknowledgement.
+service TemplateService
+{
+    rpc Increment (Amount) returns (Ack);
+    // rpc streamed (stream somehting) returns (some return);  //
+}
+
+//Amount is a type containing a string and int. They are intialized as the first and second parameter value.
+message Amount {
+    
+    string clientName = 1;
+    int32 value = 2;
+}
+
+message Ack {
+    int64 newValue = 1;
+}
+
+
+
