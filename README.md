@@ -12,19 +12,19 @@ if you haven't installed google's protocol buffers, see the prerequisites part a
     > **Tip!**
     > 
     > You can use ``example.com``, if you don't have a repo.
-2. make a ``.proto`` file in a sub-directory, for example ``time/time.proto`` and fill it with IDL.
+2. make a ``.proto`` file in a sub-directory, for example ``proto/template.proto`` and fill it with IDL.
     - notice line 3 and 4.
 
         ```Go
-        package time;
         option go_package = "GRPC-template/gRPC";
+        package gRPC;
         ```
     
 3. run command:
 
-    ``$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative time/time.proto``
+    ``$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto``
 
-    which should create the two ``pb.go`` files. Remember to change "time" to your directory and file name.
+    which should create the two ``pb.go`` files. Remember to change "proto/template" to your directory and file name.
 4. run command:
 
     ``$ go mod tidy``
@@ -33,7 +33,7 @@ if you haven't installed google's protocol buffers, see the prerequisites part a
 5. create a ``client\client.go`` file with the ``client_template.txt`` as template.
     > **Tip!**
     >
-    > When implementing your grpc methods, you should write the link without "https://" and with the packagename at the end. If you used example.com, you should write ``"example.com/package"``. If you used a long name for your package, you can write a shorter name before the quotation marks, for example ``pckg "example.com/longpackagename"``.
+    > When implementing your grpc methods, you should write the link without "https://" and with the packagename at the end. If you used example.com, you should write ``"example.com/package"``. If you used a long name for your package, you can write a shorter name (alias) before the quotation marks, for example ``pckg "example.com/longpackagename"``.
 6. create a ``server\server.go`` file with the ``server_template.txt`` as template.
 7. switch out the "myPackage" with your actual package.
 8. switch our the method names with actual method names.
@@ -48,31 +48,7 @@ if you haven't installed google's protocol buffers, see the prerequisites part a
     ``$ go run .``
 
     this will run the requests listed in the ``main`` method of the ``client`` file.
-12. create a ``Dockerfile`` like the one in this repository.
-13. change line 11, 12 and 16 to match your repository.
-    > **from now on**
-    >
-    > please remember to commit and push changes to the files in your repository before running the program.
-    >
-    > the following docker commands will clone your repository (maybe to the virtual machine?), so changes to files will not be applied, if you don't git commit yeet before.
-    >
-    > the only exception (i think) is changes to the ``client.go`` file, since it's run locally on your computer, but just connects to the server in docker.
-14. run command:
 
-    ``$ docker build -t test --no-cache .``
-
-    to build the code. what you write after ``-t`` will be the name of your image, so the name of the image here is ``test``. the name doesn't matter, but it helps you identify it in the docker desktop app.
-15. run command:
-
-    ``$ docker run -p 9080:9080 -tid test``
-
-    to run the code in a docker container. if you changed the name of the image from ``test``, make sure to change it in this command as well.
-16. change directory into your ``client`` folder.
-17. run command:
-
-    ``$ go run .``
-
-    to run the code.
 
 ## Prerequisites
 
