@@ -11,20 +11,19 @@ import (
 	"strings"
 	"time"
 
-	gRPC "github.com/DarkLordOfDeadstiny/Exam-template/proto"
+	gRPC "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-//Same principle as in client. Flags allows for user specific arguments/values
+// Same principle as in client. Flags allows for user specific arguments/values
 var clientsName = flag.String("name", "default", "Senders name")
-var tcpServer = flag.String("server", "5400", "Tcp server")
+var serverPort = flag.String("server", "5400", "Tcp server")
 
-var _ports [5]string = [5]string{*tcpServer, "5401", "5402", "5403", "5404"} //List of ports the client tries to connect to._ports
-
-var ctx context.Context                                       //Client context
-var servers []gRPC.MessageServiceClient                       //list of servers.
-var ServerConn map[gRPC.MessageServiceClient]*grpc.ClientConn //Map of server connections
+var ctx context.Context                 //Client context
+var server gRPC.TemplateServiceClient   //the server
+var ServerConn *grpc.ClientConn 		//the server connection
 
 func main() {
 	//parse flag/arguments
@@ -32,13 +31,12 @@ func main() {
 
 	fmt.Println("--- CLIENT APP ---")
 
-	//connect to log file
-	setLog()
+	//log to file instead of console
+	//setLog()
 
 	fmt.Println("--- join Server ---")
-	ServerConn = make(map[gRPC.MessageServiceClient]*grpc.ClientConn) //make map of server connections
-	joinServer()                                                      // Method call
-	defer closeAll()                                                  //when main method exits, close all the connections to the servers.
+	joinServer()
+	defer ServerConn.Close() //when main method exits, close the connection to the server.
 
 	//start the biding
 	parseInput()
@@ -48,25 +46,25 @@ func joinServer() {
 	//connect to server
 
 	//dial options
+	//the server is not using TLS, so we use insecure credentials
+	//(should be fine for local testing but not in the real world)
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithBlock(), grpc.WithInsecure())
+	opts = append(opts, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials())) 
 
 	//use context for timeout on the connection
 	timeContext, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel() //cancel the connection when we are done
 
-	for _, port := range _ports { //try to connect to all the ports in _ports with dial
-		log.Printf("client %s: Attempts to dial on port %s\n", *clientsName, port)
-		conn, err := grpc.DialContext(timeContext, fmt.Sprintf(":%s", port), opts...) //dials the port with the given timeout
-		if err != nil {
-			log.Printf("Fail to Dial : %v", err)
-			continue
-		}
-		var s = gRPC.NewMessageServiceClient(conn)
-		servers = append(servers, s)          //add the new MessageServiceClient
-		ServerConn[s] = conn                  // maps the MessageServiceClient to its connection
-		fmt.Println(conn.GetState().String()) //prints connected if it's connected (i think (☞ﾟヮﾟ)☞)
+	log.Printf("client %s: Attempts to dial on port %s\n", *clientsName, *serverPort)
+	conn, err := grpc.DialContext(timeContext, fmt.Sprintf(":%s", *serverPort), opts...) //dials the port with the given timeout
+	if err != nil {
+		log.Printf("Fail to Dial : %v", err)
+		return
 	}
+	server = gRPC.NewTemplateServiceClient(conn) //create a new gRPC client
+	ServerConn = conn                  			 // saves the MessageServiceClient's to connection
+	fmt.Println(conn.GetState().String()) //prints connected if it's connected (i think (☞ﾟヮﾟ)☞)
+
 	ctx = context.Background()
 }
 
@@ -89,8 +87,8 @@ func parseInput() {
 }
 
 func incrementVal(in string) {
-
-	val, err := strconv.ParseInt(in, 10, 32) //Convert string to int64, return error if the int is larger than 32bit
+	//Convert string to int64, return error if the int is larger than 32bit
+	val, err := strconv.ParseInt(in, 10, 32) 
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,37 +98,31 @@ func incrementVal(in string) {
 		ClientName: *clientsName,
 		Value:      int32(val), //cast from int64 to int32
 	}
-	for _, s := range servers {
-		if conReady(s) { //If the connection to the server is ready
-			fmt.Println(s)
-			ack, err := s.Increment(ctx, amount) //Make gRPC call to server with amount, and recieve acknowlegdement back.
-			if err != nil {
-				log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
-				log.Println(err)
-			}
-			if ack.NewValue >= val {
-				fmt.Printf("Success, the new value is now %d\n", ack.NewValue)
-			} else {
 
-				fmt.Println("Oh no something went wrong :(") //Hopefully this will never be reached
-			}
+	if conReady(server) { //If the connection to the server is ready
+		ack, err := server.Increment(ctx, amount) //Make gRPC call to server with amount, and recieve acknowlegdement back.
+		if err != nil {
+			log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
+			log.Println(err)
 		}
+		if ack.NewValue >= val {
+			fmt.Printf("Success, the new value is now %d\n", ack.NewValue)
+		} else {
+
+			fmt.Println("Oh no something went wrong :(") //Hopefully this will never be reached
+		}
+	} else {
+		log.Printf("Client %s: something was wrong with the connection to the server :(", *clientsName)
 	}
 }
 
-//Function which returns a true boolean if the connection to the server is ready, and false if it's not.
-func conReady(s gRPC.MessageServiceClient) bool {
-	return ServerConn[s].GetState().String() == "READY"
+// Function which returns a true boolean if the connection to the server is ready, and false if it's not.
+func conReady(s gRPC.TemplateServiceClient) bool {
+	return ServerConn.GetState().String() == "READY"
 }
 
-func closeAll() {
-	for _, c := range ServerConn {
-		c.Close()
-	}
-}
-
+// sets the logger to use a log.txt file instead of the console
 func setLog() {
-
 	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
