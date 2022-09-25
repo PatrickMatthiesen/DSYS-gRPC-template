@@ -16,7 +16,7 @@ service Template
     rpc Increment (Amount) returns (Ack);
 
     // many messages are sent and one is recieved
-    rpc SayHi (stream Greeding) returns (Farewell);  //
+    rpc SayHi (stream Greeding) returns (Farewell);
 }
 
 //Amount is a type containing a string and int. They are intialized as the first and second parameter value.

@@ -21,7 +21,6 @@ import (
 var clientsName = flag.String("name", "default", "Senders name")
 var serverPort = flag.String("server", "5400", "Tcp server")
 
-var ctx context.Context         //Client context
 var server gRPC.TemplateClient  //the server
 var ServerConn *grpc.ClientConn //the server connection
 
@@ -34,16 +33,17 @@ func main() {
 	//log to file instead of console
 	//setLog()
 
+	//connect to server and close the connection when program closes
 	fmt.Println("--- join Server ---")
 	ConnectToServer()
-	defer ServerConn.Close() //when main method exits, close the connection to the server.
+	defer ServerConn.Close()
 
 	//start the biding
 	parseInput()
 }
 
+// connect to server
 func ConnectToServer() {
-	//connect to server
 
 	//dial options
 	//the server is not using TLS, so we use insecure credentials
@@ -62,11 +62,12 @@ func ConnectToServer() {
 		log.Printf("Fail to Dial : %v", err)
 		return
 	}
-	server = gRPC.NewTemplateClient(conn)                        //create a new gRPC client
-	ServerConn = conn                                            // saves the MessageServiceClient's to connection
-	log.Println("the connection is: ", conn.GetState().String()) //logs the state of the connection (should be READY)
 
-	ctx = context.Background()
+	// makes a client from the server connection and saves the connection
+	// and prints rather or not the connection was is READY
+	server = gRPC.NewTemplateClient(conn)
+	ServerConn = conn
+	log.Println("the connection is: ", conn.GetState().String())
 }
 
 func parseInput() {
@@ -110,7 +111,7 @@ func incrementVal(val int64) {
 	}
 
 	//Make gRPC call to server with amount, and recieve acknowlegdement back.
-	ack, err := server.Increment(ctx, amount)
+	ack, err := server.Increment(context.Background(), amount)
 	if err != nil {
 		log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
 		log.Println(err)
@@ -128,7 +129,7 @@ func incrementVal(val int64) {
 
 func sayHi() {
 	// get a stream to the server
-	stream, err := server.SayHi(ctx)
+	stream, err := server.SayHi(context.Background())
 	if err != nil {
 		log.Println(err)
 		return
