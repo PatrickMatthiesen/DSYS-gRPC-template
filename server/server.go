@@ -6,6 +6,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -30,7 +31,7 @@ type Server struct {
 // flags are used to get arguments from the terminal. Flags take a value, a default value and a description of the flag.
 // to use a flag then just add it as an argument when running the program.
 var serverName = flag.String("name", "default", "Senders name") // set with "-name <name>" in terminal
-var port = flag.String("port", "5400", "Server port") // set with "-port <port>" in terminal
+var port = flag.String("port", "5400", "Server port")           // set with "-port <port>" in terminal
 
 func main() {
 
@@ -81,25 +82,37 @@ func launchServer() {
 	//code here is unreachable because serve occupies the current thread.
 }
 
-// creates a new instance of a server type
-func newServer(serverPort *string) *Server {
-	s := &Server{
-		name:           *serverName, //* is used because of flags
-		port:           *serverPort, // not sure why * isnt used here but it isn't
-		incrementValue: 0,           // gives default value, but not sure if it is necessary
-	}
-
-	fmt.Println(s) //prints the server struct to console
-	return s       //return server
-}
-
 // The method format can be found in the pb.go file. If the format is wrong, the server type will give an error.
 func (s *Server) Increment(ctx context.Context, Amount *gRPC.Amount) (*gRPC.Ack, error) {
 	s.mutex.Lock()         //locks the server ensuring no one else can increment the value
 	defer s.mutex.Unlock() //unlocks the mutex when exiting the method
 
-	s.incrementValue += int64(Amount.GetValue())      //add value from Amount.ctx
+	s.incrementValue += int64(Amount.GetValue())      //add value from Amount.
 	return &gRPC.Ack{NewValue: s.incrementValue}, nil //create a new acknowlegdement with the new incremented value and returns it.
+}
+
+func (s *Server) SayHi(msgStream gRPC.TemplateService_SayHiServer) error {
+	for {
+		// get the next message from the stream
+		msg, err := msgStream.Recv()
+
+		//the stream is closed so we can exit the loop
+		if err == io.EOF {
+			break
+		}
+		//some other error
+		if err != nil {
+			return err
+		}
+		// log the message
+		log.Printf("Received message from %s: %s", msg.ClientName, msg.Message)
+	}
+
+	// be a nice server and say goodbye to the client :)
+	ack := &gRPC.Farewell{Message: "Goodbye"}
+	msgStream.SendAndClose(ack)
+
+	return nil
 }
 
 // sets the logger to use a log.txt file instead of the console
@@ -116,5 +129,4 @@ func setLog() {
 	}
 	defer f.Close()
 	log.SetOutput(f)
-
 }

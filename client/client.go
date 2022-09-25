@@ -84,39 +84,68 @@ func parseInput() {
 			log.Fatal(err)
 		}
 		input = strings.TrimSpace(input) //Trim input
-		incrementVal(input)
+
+		if !conReady(server) {
+			log.Printf("Client %s: something was wrong with the connection to the server :(", *clientsName)
+			continue
+		}
+
+		//Convert string to int64, return error if the int is larger than 32bit or not a number
+		val, err := strconv.ParseInt(input, 10, 64)
+		if err != nil {
+			if input == "hi" {
+				sayHi()
+			}
+			continue
+		}
+		incrementVal(val)
 	}
 }
 
-func incrementVal(in string) {
-	//Convert string to int64, return error if the int is larger than 32bit or not a number
-	val, err := strconv.ParseInt(in, 10, 32)
+func incrementVal(val int64) {
+	//create amount type
+	amount := &gRPC.Amount{
+		ClientName: *clientsName,
+		Value:      val, //cast from int to int32
+	}
+
+	//Make gRPC call to server with amount, and recieve acknowlegdement back.
+	ack, err := server.Increment(ctx, amount) 
+	if err != nil {
+		log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
+		log.Println(err)
+	}
+
+	// check if the server has handled the request correctly
+	if ack.NewValue >= val {
+		fmt.Printf("Success, the new value is now %d\n", ack.NewValue)
+	} else {
+		// something could be added here to handle the error
+		// but hopefully this will never be reached
+		fmt.Println("Oh no something went wrong :(") 
+	}
+}
+
+func sayHi() {
+	// get a stream to the server
+	stream, err := server.SayHi(ctx)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	//create amount type
-	amount := &gRPC.Amount{
-		ClientName: *clientsName,
-		Value:      int32(val), //cast from int64 to int32
-	}
+	// send some messages to the server
+	stream.Send(&gRPC.Greeding{ClientName: *clientsName, Message: "Hi"})
+	stream.Send(&gRPC.Greeding{ClientName: *clientsName, Message: "How are you?"})
+	stream.Send(&gRPC.Greeding{ClientName: *clientsName, Message: "I'm fine, thanks."})
 
-	if conReady(server) { //If the connection to the server is ready
-		ack, err := server.Increment(ctx, amount) //Make gRPC call to server with amount, and recieve acknowlegdement back.
-		if err != nil {
-			log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
-			log.Println(err)
-		}
-		if ack.NewValue >= val {
-			fmt.Printf("Success, the new value is now %d\n", ack.NewValue)
-		} else {
-
-			fmt.Println("Oh no something went wrong :(") //Hopefully this will never be reached
-		}
-	} else {
-		log.Printf("Client %s: something was wrong with the connection to the server :(", *clientsName)
+	// close the stream
+	farewell, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Println(err)
+		return
 	}
+	log.Println("server says: ", farewell)
 }
 
 // Function which returns a true boolean if the connection to the server is ready, and false if it's not.
