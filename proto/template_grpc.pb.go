@@ -14,57 +14,57 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// TemplateServiceClient is the client API for TemplateService service.
+// TemplateClient is the client API for Template service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TemplateServiceClient interface {
+type TemplateClient interface {
 	//one message is sent and one is recieved
 	Increment(ctx context.Context, in *Amount, opts ...grpc.CallOption) (*Ack, error)
 	// many messages are sent and one is recieved
-	SayHi(ctx context.Context, opts ...grpc.CallOption) (TemplateService_SayHiClient, error)
+	SayHi(ctx context.Context, opts ...grpc.CallOption) (Template_SayHiClient, error)
 }
 
-type templateServiceClient struct {
+type templateClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTemplateServiceClient(cc grpc.ClientConnInterface) TemplateServiceClient {
-	return &templateServiceClient{cc}
+func NewTemplateClient(cc grpc.ClientConnInterface) TemplateClient {
+	return &templateClient{cc}
 }
 
-func (c *templateServiceClient) Increment(ctx context.Context, in *Amount, opts ...grpc.CallOption) (*Ack, error) {
+func (c *templateClient) Increment(ctx context.Context, in *Amount, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/gRPC.TemplateService/Increment", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Template/Increment", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *templateServiceClient) SayHi(ctx context.Context, opts ...grpc.CallOption) (TemplateService_SayHiClient, error) {
-	stream, err := c.cc.NewStream(ctx, &TemplateService_ServiceDesc.Streams[0], "/gRPC.TemplateService/SayHi", opts...)
+func (c *templateClient) SayHi(ctx context.Context, opts ...grpc.CallOption) (Template_SayHiClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Template_ServiceDesc.Streams[0], "/proto.Template/SayHi", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &templateServiceSayHiClient{stream}
+	x := &templateSayHiClient{stream}
 	return x, nil
 }
 
-type TemplateService_SayHiClient interface {
+type Template_SayHiClient interface {
 	Send(*Greeding) error
 	CloseAndRecv() (*Farewell, error)
 	grpc.ClientStream
 }
 
-type templateServiceSayHiClient struct {
+type templateSayHiClient struct {
 	grpc.ClientStream
 }
 
-func (x *templateServiceSayHiClient) Send(m *Greeding) error {
+func (x *templateSayHiClient) Send(m *Greeding) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *templateServiceSayHiClient) CloseAndRecv() (*Farewell, error) {
+func (x *templateSayHiClient) CloseAndRecv() (*Farewell, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -75,77 +75,77 @@ func (x *templateServiceSayHiClient) CloseAndRecv() (*Farewell, error) {
 	return m, nil
 }
 
-// TemplateServiceServer is the server API for TemplateService service.
-// All implementations must embed UnimplementedTemplateServiceServer
+// TemplateServer is the server API for Template service.
+// All implementations must embed UnimplementedTemplateServer
 // for forward compatibility
-type TemplateServiceServer interface {
+type TemplateServer interface {
 	//one message is sent and one is recieved
 	Increment(context.Context, *Amount) (*Ack, error)
 	// many messages are sent and one is recieved
-	SayHi(TemplateService_SayHiServer) error
-	mustEmbedUnimplementedTemplateServiceServer()
+	SayHi(Template_SayHiServer) error
+	mustEmbedUnimplementedTemplateServer()
 }
 
-// UnimplementedTemplateServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedTemplateServiceServer struct {
+// UnimplementedTemplateServer must be embedded to have forward compatible implementations.
+type UnimplementedTemplateServer struct {
 }
 
-func (UnimplementedTemplateServiceServer) Increment(context.Context, *Amount) (*Ack, error) {
+func (UnimplementedTemplateServer) Increment(context.Context, *Amount) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Increment not implemented")
 }
-func (UnimplementedTemplateServiceServer) SayHi(TemplateService_SayHiServer) error {
+func (UnimplementedTemplateServer) SayHi(Template_SayHiServer) error {
 	return status.Errorf(codes.Unimplemented, "method SayHi not implemented")
 }
-func (UnimplementedTemplateServiceServer) mustEmbedUnimplementedTemplateServiceServer() {}
+func (UnimplementedTemplateServer) mustEmbedUnimplementedTemplateServer() {}
 
-// UnsafeTemplateServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TemplateServiceServer will
+// UnsafeTemplateServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TemplateServer will
 // result in compilation errors.
-type UnsafeTemplateServiceServer interface {
-	mustEmbedUnimplementedTemplateServiceServer()
+type UnsafeTemplateServer interface {
+	mustEmbedUnimplementedTemplateServer()
 }
 
-func RegisterTemplateServiceServer(s grpc.ServiceRegistrar, srv TemplateServiceServer) {
-	s.RegisterService(&TemplateService_ServiceDesc, srv)
+func RegisterTemplateServer(s grpc.ServiceRegistrar, srv TemplateServer) {
+	s.RegisterService(&Template_ServiceDesc, srv)
 }
 
-func _TemplateService_Increment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Template_Increment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Amount)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TemplateServiceServer).Increment(ctx, in)
+		return srv.(TemplateServer).Increment(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gRPC.TemplateService/Increment",
+		FullMethod: "/proto.Template/Increment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TemplateServiceServer).Increment(ctx, req.(*Amount))
+		return srv.(TemplateServer).Increment(ctx, req.(*Amount))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TemplateService_SayHi_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(TemplateServiceServer).SayHi(&templateServiceSayHiServer{stream})
+func _Template_SayHi_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(TemplateServer).SayHi(&templateSayHiServer{stream})
 }
 
-type TemplateService_SayHiServer interface {
+type Template_SayHiServer interface {
 	SendAndClose(*Farewell) error
 	Recv() (*Greeding, error)
 	grpc.ServerStream
 }
 
-type templateServiceSayHiServer struct {
+type templateSayHiServer struct {
 	grpc.ServerStream
 }
 
-func (x *templateServiceSayHiServer) SendAndClose(m *Farewell) error {
+func (x *templateSayHiServer) SendAndClose(m *Farewell) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *templateServiceSayHiServer) Recv() (*Greeding, error) {
+func (x *templateSayHiServer) Recv() (*Greeding, error) {
 	m := new(Greeding)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -153,22 +153,22 @@ func (x *templateServiceSayHiServer) Recv() (*Greeding, error) {
 	return m, nil
 }
 
-// TemplateService_ServiceDesc is the grpc.ServiceDesc for TemplateService service.
+// Template_ServiceDesc is the grpc.ServiceDesc for Template service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TemplateService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gRPC.TemplateService",
-	HandlerType: (*TemplateServiceServer)(nil),
+var Template_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Template",
+	HandlerType: (*TemplateServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Increment",
-			Handler:    _TemplateService_Increment_Handler,
+			Handler:    _Template_Increment_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "SayHi",
-			Handler:       _TemplateService_SayHi_Handler,
+			Handler:       _Template_SayHi_Handler,
 			ClientStreams: true,
 		},
 	},

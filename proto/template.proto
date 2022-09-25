@@ -2,14 +2,15 @@ syntax = "proto3";
 
 option go_package = "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto";
 
-package gRPC;
+package proto;
 
-//compile command
+// compile command:
 // protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative [path to file, ex. proto/template.proto]
 
 
-//Increment method which sends an amount and recieves an ackknowledgement.
-service TemplateService
+// The template service definition.
+// you can call it whatever you want
+service Template
 {
     //one message is sent and one is recieved
     rpc Increment (Amount) returns (Ack);

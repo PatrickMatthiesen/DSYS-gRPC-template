@@ -21,9 +21,9 @@ import (
 var clientsName = flag.String("name", "default", "Senders name")
 var serverPort = flag.String("server", "5400", "Tcp server")
 
-var ctx context.Context               //Client context
-var server gRPC.TemplateServiceClient //the server
-var ServerConn *grpc.ClientConn       //the server connection
+var ctx context.Context         //Client context
+var server gRPC.TemplateClient  //the server
+var ServerConn *grpc.ClientConn //the server connection
 
 func main() {
 	//parse flag/arguments
@@ -62,7 +62,7 @@ func ConnectToServer() {
 		log.Printf("Fail to Dial : %v", err)
 		return
 	}
-	server = gRPC.NewTemplateServiceClient(conn)                 //create a new gRPC client
+	server = gRPC.NewTemplateClient(conn)                        //create a new gRPC client
 	ServerConn = conn                                            // saves the MessageServiceClient's to connection
 	log.Println("the connection is: ", conn.GetState().String()) //logs the state of the connection (should be READY)
 
@@ -110,7 +110,7 @@ func incrementVal(val int64) {
 	}
 
 	//Make gRPC call to server with amount, and recieve acknowlegdement back.
-	ack, err := server.Increment(ctx, amount) 
+	ack, err := server.Increment(ctx, amount)
 	if err != nil {
 		log.Printf("Client %s: no response from the server, attempting to reconnect", *clientsName)
 		log.Println(err)
@@ -122,7 +122,7 @@ func incrementVal(val int64) {
 	} else {
 		// something could be added here to handle the error
 		// but hopefully this will never be reached
-		fmt.Println("Oh no something went wrong :(") 
+		fmt.Println("Oh no something went wrong :(")
 	}
 }
 
@@ -149,7 +149,7 @@ func sayHi() {
 }
 
 // Function which returns a true boolean if the connection to the server is ready, and false if it's not.
-func conReady(s gRPC.TemplateServiceClient) bool {
+func conReady(s gRPC.TemplateClient) bool {
 	return ServerConn.GetState().String() == "READY"
 }
 

@@ -1,7 +1,5 @@
 package main
 
-//todo , kør den nye proto fil, så du kan få de nye types, ellers får du problemer med at metoderne ikke er de samme senere hen.
-
 import (
 	"context"
 	"flag"
@@ -13,19 +11,20 @@ import (
 	"sync"
 	"time"
 
-	//this has to be the same as the go.mod module followed by the folder the proto file is in.
+	// this has to be the same as the go.mod module,
+	// followed by the path to the folder the proto file is in.
 	gRPC "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto"
 
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	gRPC.UnimplementedTemplateServiceServer        //You need this line if you have a server
-	name                                    string //Not required but useful if you want to name your server
-	port                                    string //Not required but useful if your server needs to know what port it's listening to
+	gRPC.UnimplementedTemplateServer        // You need this line if you have a server
+	name                                    string // Not required but useful if you want to name your server
+	port                                    string // Not required but useful if your server needs to know what port it's listening to
 
-	incrementValue int64      //value that clients can increment.
-	mutex          sync.Mutex //used to lock the server to avoid race conditions.
+	incrementValue int64      // value that clients can increment.
+	mutex          sync.Mutex // used to lock the server to avoid race conditions.
 }
 
 // flags are used to get arguments from the terminal. Flags take a value, a default value and a description of the flag.
@@ -41,10 +40,10 @@ func main() {
 	flag.Parse()
 	fmt.Println(".:server is starting:.")
 
-	//starts a goroutine executing the launchServer method.
+	// starts a goroutine executing the launchServer method.
 	go launchServer()
 
-	//This makes sure that the main method is "kept alive"/keeps running
+	// This makes sure that the main method is "kept alive"/keeps running
 	for {
 		time.Sleep(time.Second * 5)
 	}
@@ -60,7 +59,7 @@ func launchServer() {
 		return
 	}
 
-	//makes gRPC server using the options
+	// makes gRPC server using the options
 	// you can add options here if you want or remove the options part entirely
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
@@ -72,35 +71,39 @@ func launchServer() {
 		incrementValue: 0, // gives default value, but not sure if it is necessary
 	}
 
-	gRPC.RegisterTemplateServiceServer(grpcServer, server) //Registers the server to the gRPC server.
+	gRPC.RegisterTemplateServer(grpcServer, server) //Registers the server to the gRPC server.
 
 	log.Printf("Server %s: Listening on port %s\n", *serverName, *port)
 
 	if err := grpcServer.Serve(list); err != nil {
 		log.Fatalf("failed to serve %v", err)
 	}
-	//code here is unreachable because serve occupies the current thread.
+	// code here is unreachable because grpcServer.Serve occupies the current thread.
 }
 
 // The method format can be found in the pb.go file. If the format is wrong, the server type will give an error.
 func (s *Server) Increment(ctx context.Context, Amount *gRPC.Amount) (*gRPC.Ack, error) {
-	s.mutex.Lock()         //locks the server ensuring no one else can increment the value
-	defer s.mutex.Unlock() //unlocks the mutex when exiting the method
+	// locks the server ensuring no one else can increment the value at the same time.
+	// and unlocks the server when the method is done.
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	s.incrementValue += int64(Amount.GetValue())      //add value from Amount.
-	return &gRPC.Ack{NewValue: s.incrementValue}, nil //create a new acknowlegdement with the new incremented value and returns it.
+	// increments the value by the amount given in the request,
+	// and returns the new value.
+	s.incrementValue += int64(Amount.GetValue())
+	return &gRPC.Ack{NewValue: s.incrementValue}, nil
 }
 
-func (s *Server) SayHi(msgStream gRPC.TemplateService_SayHiServer) error {
+func (s *Server) SayHi(msgStream gRPC.Template_SayHiServer) error {
 	for {
 		// get the next message from the stream
 		msg, err := msgStream.Recv()
 
-		//the stream is closed so we can exit the loop
+		// the stream is closed so we can exit the loop
 		if err == io.EOF {
 			break
 		}
-		//some other error
+		// some other error
 		if err != nil {
 			return err
 		}
@@ -117,12 +120,12 @@ func (s *Server) SayHi(msgStream gRPC.TemplateService_SayHiServer) error {
 
 // sets the logger to use a log.txt file instead of the console
 func setLog() {
-	//Clears the log.txt file when a new server is started
+	// Clears the log.txt file when a new server is started
 	if err := os.Truncate("log.txt", 0); err != nil {
 		log.Printf("Failed to truncate: %v", err)
 	}
 
-	//This connects to the log file/changes the output of the log informaiton to the log.txt file.
+	// This connects to the log file/changes the output of the log informaiton to the log.txt file.
 	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
