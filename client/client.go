@@ -21,9 +21,9 @@ import (
 var clientsName = flag.String("name", "default", "Senders name")
 var serverPort = flag.String("server", "5400", "Tcp server")
 
-var ctx context.Context                 //Client context
-var server gRPC.TemplateServiceClient   //the server
-var ServerConn *grpc.ClientConn 		//the server connection
+var ctx context.Context               //Client context
+var server gRPC.TemplateServiceClient //the server
+var ServerConn *grpc.ClientConn       //the server connection
 
 func main() {
 	//parse flag/arguments
@@ -35,35 +35,36 @@ func main() {
 	//setLog()
 
 	fmt.Println("--- join Server ---")
-	joinServer()
+	ConnectToServer()
 	defer ServerConn.Close() //when main method exits, close the connection to the server.
 
 	//start the biding
 	parseInput()
 }
 
-func joinServer() {
+func ConnectToServer() {
 	//connect to server
 
 	//dial options
 	//the server is not using TLS, so we use insecure credentials
 	//(should be fine for local testing but not in the real world)
 	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials())) 
+	opts = append(opts, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	//use context for timeout on the connection
 	timeContext, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel() //cancel the connection when we are done
 
+	//dial the server to get a connection to it
 	log.Printf("client %s: Attempts to dial on port %s\n", *clientsName, *serverPort)
 	conn, err := grpc.DialContext(timeContext, fmt.Sprintf(":%s", *serverPort), opts...) //dials the port with the given timeout
 	if err != nil {
 		log.Printf("Fail to Dial : %v", err)
 		return
 	}
-	server = gRPC.NewTemplateServiceClient(conn) //create a new gRPC client
-	ServerConn = conn                  			 // saves the MessageServiceClient's to connection
-	fmt.Println(conn.GetState().String()) //prints connected if it's connected (i think (☞ﾟヮﾟ)☞)
+	server = gRPC.NewTemplateServiceClient(conn)                 //create a new gRPC client
+	ServerConn = conn                                            // saves the MessageServiceClient's to connection
+	log.Println("the connection is: ", conn.GetState().String()) //logs the state of the connection (should be READY)
 
 	ctx = context.Background()
 }
@@ -77,20 +78,22 @@ func parseInput() {
 	for {
 		fmt.Print("-> ")
 
-		in, err := reader.ReadString('\n') //Read input into var in
+		//Read input into var input and any errors into err
+		input, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
-		in = strings.TrimSpace(in) //Trim input
-		incrementVal(in)
+		input = strings.TrimSpace(input) //Trim input
+		incrementVal(input)
 	}
 }
 
 func incrementVal(in string) {
-	//Convert string to int64, return error if the int is larger than 32bit
-	val, err := strconv.ParseInt(in, 10, 32) 
+	//Convert string to int64, return error if the int is larger than 32bit or not a number
+	val, err := strconv.ParseInt(in, 10, 32)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
 	//create amount type
@@ -129,5 +132,4 @@ func setLog() {
 	}
 	defer f.Close()
 	log.SetOutput(f)
-
 }
