@@ -47,24 +47,11 @@ If you haven't installed google's protocol buffers, see the prerequisites part a
     ``$ go mod tidy``
 
     to install dependencies and create the ``go.sum`` file.
-5. create a ``client\client.go`` file with the ``client_template.txt`` as template.
-    > **Tip!**
-    >
-    > When implementing your grpc methods, you should write the link without "https://" and with the package name at the end. If you used example.com, you should write ``"example.com/package"``. If you used a long name for your package, you can write a shorter name (alias) before the quotation marks, for example ``pckg "example.com/longpackagename"``.
-6. create a ``server\server.go`` file with the ``server_template.txt`` as template.
-7. switch out the "myPackage" with your actual package.
-8. switch our the method names with actual method names.
-9. add more methods to the ``client.go`` file, so that there's a method for each request in the ``.proto`` file.
-10. when everything is compilable, open a terminal, change directory to the ``server`` folder, and run the command:
+5. Implement your client and server. Refer to [Implementation](#implementation) for instructions.
+6. open a terminal for each the client(s) and server(s) and run them with:
 
-    ``$ go run .``
-
-    this will start your server.
-11. open a new terminal, change directory to the ``client`` folder and run the command:
-
-    ``$ go run .``
-
-    this will run the requests listed in the ``main`` method of the ``client`` file.
+The Client: `$ go run .\client\client.go`
+The Server: `$ go run .\server\server.go`
 
 ## The Proto file
 
