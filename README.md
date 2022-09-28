@@ -117,7 +117,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 - notes:
   - All names of services, endpoints and message types should be in CamelCase
-  - an example can be found in [template.proto](proto\template.proto)
+  - an example can be found in [template.proto](proto/template.proto)
 
 ## Implementation
 
