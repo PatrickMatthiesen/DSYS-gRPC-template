@@ -13,7 +13,7 @@ import (
 
 	// this has to be the same as the go.mod module,
 	// followed by the path to the folder the proto file is in.
-	gRPC "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto"
+	gRPC "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto"
 
 	"google.golang.org/grpc"
 )

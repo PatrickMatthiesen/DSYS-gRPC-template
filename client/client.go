@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	gRPC "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto"
+	gRPC "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

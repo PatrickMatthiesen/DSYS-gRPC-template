@@ -1,4 +1,4 @@
-module github.com/DarkLordOfDeadstiny/DSYS-gRPC-template
+module github.com/PatrickMatthiesen/DSYS-gRPC-template
 
 go 1.19
 

@@ -71,7 +71,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 2. A path for the compiler to know what the package name of the pb.go files needs to have, then an option go_package will need to be set. It is gonna use the last part of the path as the name of the package, but it matters little, it just needs to be unique. The example below will make the package name "proto"
 
     ```proto
-    option go_package = "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto";
+    option go_package = "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto";
     ```
 
 3. Add a package name that is the same as the last folder from above ("proto" in this example)

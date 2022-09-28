@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/DarkLordOfDeadstiny/DSYS-gRPC-template/proto";
+option go_package = "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto";
 
 package proto;
 
