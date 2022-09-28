@@ -249,6 +249,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     ```
 
 ## Prerequisites
+### Windows
 
 > Feel free to ask for help if this doesn't work anymore
 
@@ -273,3 +274,11 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     ``$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26``
 
     ``$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1``
+
+### Mac OS
+``` 
+brew install go
+brew install protoc-gen-go
+brew install protobuf
+brew install protoc-gen-go-grpc
+```
