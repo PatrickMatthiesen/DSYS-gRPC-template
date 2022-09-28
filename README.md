@@ -50,8 +50,9 @@ If you haven't installed google's protocol buffers, see the prerequisites part a
 5. Implement your client and server. Refer to [Implementation](#implementation) for instructions.
 6. open a terminal for each the client(s) and server(s) and run them with:
 
-The Client: `$ go run .\client\client.go`
-The Server: `$ go run .\server\server.go`
+    The Client: `$ go run .\client\client.go`
+
+    The Server: `$ go run .\server\server.go`
 
 ## The Proto file
 
