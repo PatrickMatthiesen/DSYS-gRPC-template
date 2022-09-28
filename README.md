@@ -278,7 +278,13 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 ### Mac OS
 ``` 
 brew install go
+```
+```
 brew install protoc-gen-go
+```
+```
 brew install protobuf
+```
+```
 brew install protoc-gen-go-grpc
 ```
