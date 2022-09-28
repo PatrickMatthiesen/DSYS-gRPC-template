@@ -3,6 +3,9 @@
 > **Disclaimer**
 >
 > This is NOT to say how you NEED to do it, but a guide that can show you how YOU might WANT to do it.
+>
+> A simpler older version of this guide can be found at:
+> https://github.com/NaddiNadja/grpc101
 
 - [gRPC guide](#grpc-guide)
   - [Setup of new repository](#setup-of-new-repository)
