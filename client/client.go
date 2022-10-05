@@ -9,7 +9,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	gRPC "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto"
 
@@ -51,13 +50,9 @@ func ConnectToServer() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	//use context for timeout on the connection
-	timeContext, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel() //cancel the connection when we are done
-
-	//dial the server to get a connection to it
+	//dial the server, with the flag "server", to get a connection to it
 	log.Printf("client %s: Attempts to dial on port %s\n", *clientsName, *serverPort)
-	conn, err := grpc.DialContext(timeContext, fmt.Sprintf(":%s", *serverPort), opts...)
+	conn, err := grpc.Dial(fmt.Sprintf(":%s", *serverPort), opts...)
 	if err != nil {
 		log.Printf("Fail to Dial : %v", err)
 		return

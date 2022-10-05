@@ -19,9 +19,9 @@ import (
 )
 
 type Server struct {
-	gRPC.UnimplementedTemplateServer        // You need this line if you have a server
-	name                                    string // Not required but useful if you want to name your server
-	port                                    string // Not required but useful if your server needs to know what port it's listening to
+	gRPC.UnimplementedTemplateServer // You need this line if you have a server
+	name                      string // Not required but useful if you want to name your server
+	port                      string // Not required but useful if your server needs to know what port it's listening to
 
 	incrementValue int64      // value that clients can increment.
 	mutex          sync.Mutex // used to lock the server to avoid race conditions.
@@ -73,7 +73,7 @@ func launchServer() {
 
 	gRPC.RegisterTemplateServer(grpcServer, server) //Registers the server to the gRPC server.
 
-	log.Printf("Server %s: Listening on port %s\n", *serverName, *port)
+	log.Printf("Server %s: Listening at %v\n", *serverName, list.Addr())
 
 	if err := grpcServer.Serve(list); err != nil {
 		log.Fatalf("failed to serve %v", err)
@@ -116,6 +116,20 @@ func (s *Server) SayHi(msgStream gRPC.Template_SayHiServer) error {
 	msgStream.SendAndClose(ack)
 
 	return nil
+}
+
+// Get preferred outbound ip of this machine
+// is usefull if you have to know what ip a client on an other computer should listen at
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
 }
 
 // sets the logger to use a log.txt file instead of the console

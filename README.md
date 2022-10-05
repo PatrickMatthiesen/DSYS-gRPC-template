@@ -1,11 +1,14 @@
 # gRPC guide
 
-> **Disclaimer**
+> **Disclaimers**
 >
 > This is NOT to say how you NEED to do it, but a guide that can show you how YOU might WANT to do it.
 >
-> A simpler older version of this guide can be found at:
-> https://github.com/NaddiNadja/grpc101
+> A **simpler** and older version of this guide can be found at:
+> <https://github.com/NaddiNadja/grpc101>
+>
+> This guide is not a step by step guide and it might be a bit overcomplicated for some people. I hoped that it would be better to give more than too little.
+> The guide may hold text like "\<add a name here\>", this should be understood as take it all and replace it with a name so "\<add a name here\>" would become something like "Name".
 
 - [gRPC guide](#grpc-guide)
   - [Setup of new repository](#setup-of-new-repository)
@@ -17,6 +20,9 @@
     - [Implementing the server methods](#implementing-the-server-methods)
     - [Calling the endpoints from client](#calling-the-endpoints-from-client)
   - [Prerequisites](#prerequisites)
+    - [Download proto on Windows](#download-proto-on-windows)
+    - [Download proto on Mac OS](#download-proto-on-mac-os)
+    - [MY Recommended VSCode extensions for colors](#my-recommended-vscode-extensions-for-colors)
 
 If you haven't installed google's protocol buffers, see the prerequisites part at the bottom.
 
@@ -26,16 +32,10 @@ If you haven't installed google's protocol buffers, see the prerequisites part a
 
     ``$ go mod init [link to repo without "https://"]``
 
-    Your repo should be on the public github as it needs to be an accessable web page. 
+    Your repo should be on the public github as it needs to be an accessable web page.
+    If you want to keep it simple, but differ from the standard, then you can just call it something short like "Incrementer", as that would fit the name of this example.
 
-2. Make a ``.proto`` file in a sub-directory, for example ``proto/template.proto`` and fill it with IDL.
-    - Notice line 3 and 4.
-
-        ```Go
-        option go_package = "DSYS-gRPC-template/gRPC";
-        package gRPC;
-        ```
-
+2. Make a ``.proto`` file in a sub-directory, for example ``proto/template.proto`` and make your service.
     > see [The Proto file](#the-proto-file) for info on what to add in the ``.proto`` file
 3. Run command:
 
@@ -169,6 +169,15 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     ```
 
 3. Serving the endpoint
+
+   - Make a main method and add the following
+
+   - Listen on a port
+
+    ```go
+    list, _ := net.Listen("tcp", "localhost:5400"))
+    ```
+
    - Make a grpc server
 
     ```go
@@ -183,7 +192,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-    - Register your server struct
+    - Register your server struct. Remember that you need to change "Template" to what your service is called.
 
     ```go
     gRPC.RegisterTemplateServer(grpcServer, server)
@@ -213,11 +222,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 2. Make a context with insecure credentials, as we don't have something called a TLS certificate
 
     ```go
-    conn, err := grpc.DialContext(
-        timeContext,
-        fmt.Sprintf(":%s", *serverPort),
-        opts...
-    )
+    conn, err := grpc.Dial(":5400", opts...)
     ```
 
 3. Make a client that has the endpoint methods
@@ -249,7 +254,8 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     ```
 
 ## Prerequisites
-### Windows
+
+### Download proto on Windows
 
 > Feel free to ask for help if this doesn't work anymore
 
@@ -257,34 +263,38 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     - go to this link: <https://developers.google.com/protocol-buffers/docs/downloads>
     - click on the "release page" link.
     - find the version you need and download it.
-    - as per October 2021, if your on windows, it's the third from the bottom, ``protoc-3.18.1-win64.zip``.
+    - as per October 2021, if your on windows, it's the third from the bottom, `protoc-3.18.1-win64.zip`.
 2. unzip the downloaded file somewhere "safe".
-    - on my windows machine, I placed it in ``C:\Program Files\Protoc``
-3. add the path to the ``bin`` folder to your system variables.
+    - on my windows machine, I placed it in `C:\Program Files\Protoc`
+3. add the path to the `bin` folder to your system variables.
     - on windows, click the windows key and search for "system", then there should come something up like "edit the system environment variables".
     - click the button "environment variables..." at the bottom.
     - in the bottom list select the variable called "path" and click "edit ..."
     - in the pop-up window, click "new..."
-    - paste the total path to the ``bin`` folder into the text field.
+    - paste the total path to the `bin` folder into the text field.
 
-        my path is ``C:\Program Files\Protoc\bin``.
+        my path is `C:\Program Files\Protoc\bin`.
     - click "ok".
 4. open a terminal and run these commands:
 
-    ``$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26``
+    `$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26`
 
-    ``$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1``
+    `$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1`
 
-### Mac OS
-``` 
-brew install go
-```
-```
-brew install protoc-gen-go
-```
-```
-brew install protobuf
-```
-```
-brew install protoc-gen-go-grpc
-```
+### Download proto on Mac OS
+
+`$ brew install go`
+
+`$ brew install protoc-gen-go`
+
+`$ brew install protobuf`
+
+`$ brew install protoc-gen-go-grpc`
+
+### MY Recommended VSCode extensions for colors
+
+- Linting for Go
+    > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=golang.Go>
+
+- Linting for Proto
+    > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3>
