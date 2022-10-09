@@ -9,7 +9,6 @@ import (
 	"net"
 	"os"
 	"sync"
-	"time"
 
 	// this has to be the same as the go.mod module,
 	// followed by the path to the folder the proto file is in.
@@ -19,9 +18,9 @@ import (
 )
 
 type Server struct {
-	gRPC.UnimplementedTemplateServer // You need this line if you have a server
-	name                      string // Not required but useful if you want to name your server
-	port                      string // Not required but useful if your server needs to know what port it's listening to
+	gRPC.UnimplementedTemplateServer        // You need this line if you have a server
+	name                             string // Not required but useful if you want to name your server
+	port                             string // Not required but useful if your server needs to know what port it's listening to
 
 	incrementValue int64      // value that clients can increment.
 	mutex          sync.Mutex // used to lock the server to avoid race conditions.
@@ -41,12 +40,9 @@ func main() {
 	fmt.Println(".:server is starting:.")
 
 	// starts a goroutine executing the launchServer method.
-	go launchServer()
+	launchServer()
 
-	// This makes sure that the main method is "kept alive"/keeps running
-	for {
-		time.Sleep(time.Second * 5)
-	}
+	// code here is unreachable because launchServer occupies the current thread.
 }
 
 func launchServer() {
@@ -119,7 +115,7 @@ func (s *Server) SayHi(msgStream gRPC.Template_SayHiServer) error {
 }
 
 // Get preferred outbound ip of this machine
-// is usefull if you have to know what ip a client on an other computer should listen at
+// Usefull if you have to know which ip you should dial, in a client running on an other computer
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {

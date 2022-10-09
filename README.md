@@ -10,45 +10,57 @@
 > This guide is not a step by step guide and it might be a bit overcomplicated for some people. I hoped that it would be better to give more than too little.
 > The guide may hold text like "\<add a name here\>", this should be understood as take it all and replace it with a name so "\<add a name here\>" would become something like "Name".
 
-- [gRPC guide](#grpc-guide)
-  - [Setup of new repository](#setup-of-new-repository)
-  - [The Proto file](#the-proto-file)
-    - [What is it?](#what-is-it)
-    - [Required lines](#required-lines)
-    - [Defining a service](#defining-a-service)
-  - [Implementation](#implementation)
-    - [Implementing the server methods](#implementing-the-server-methods)
-    - [Calling the endpoints from client](#calling-the-endpoints-from-client)
-  - [Prerequisites](#prerequisites)
-    - [Download proto on Windows](#download-proto-on-windows)
-    - [Download proto on Mac OS](#download-proto-on-mac-os)
-    - [MY Recommended VSCode extensions for colors](#my-recommended-vscode-extensions-for-colors)
+- [Intro](#intro)
+- [Setup of new repository](#setup-of-new-repository)
+- [The Proto file](#the-proto-file)
+  - [What is it?](#what-is-it)
+  - [Required lines](#required-lines)
+  - [Defining a service](#defining-a-service)
+- [Implementation](#implementation)
+  - [Implementing the server methods](#implementing-the-server-methods)
+  - [Calling the endpoints from client](#calling-the-endpoints-from-client)
+- [Prerequisites](#prerequisites)
+  - [Download protoc on Windows](#download-protoc-on-windows)
+  - [Download protoc on Mac OS](#download-protoc-on-mac-os)
+  - [MY recommended VSCode extensions for colors](#my-recommended-vscode-extensions-for-colors)
 
 If you haven't installed google's protocol buffers, see the prerequisites part at the bottom.
+
+## Intro
+
+>I will complete this at a later time (TODO)
+
+You can start by following the [Setup of new repository](#setup-of-new-repository), which should show you how to start making your own repository structure and how to run the files. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, then try to compare it to the working code example in this repository.
 
 ## Setup of new repository
 
 1. Make ``go.mod`` file with:
 
-    ``$ go mod init [link to repo without "https://"]``
+    ```sh
+    go mod init [link to repo without "https://"]
+    ```
 
     Your repo should be on the public github as it needs to be an accessable web page.
     If you want to keep it simple, but differ from the standard, then you can just call it something short like "Incrementer", as that would fit the name of this example.
 
 2. Make a ``.proto`` file in a sub-directory, for example ``proto/template.proto`` and make your service.
-    > see [The Proto file](#the-proto-file) for info on what to add in the ``.proto`` file
+    > See [The Proto file](#the-proto-file) for info on what to add in the ``.proto`` file
 3. Run command:
 
-    ``$ protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto``
+    ```sh
+    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto
+    ```
 
-    which should create the two ``pb.go`` files. Remember to change "proto/template" to your directory and file name.
-4. run command:
+    The command should create the **two** ``pb.go`` files. Remember to change "proto/template" to your directory and file name.
+4. Run command:
 
-    ``$ go mod tidy``
+    ```sh
+    go mod tidy
+    ```
 
     to install dependencies and create the ``go.sum`` file.
 5. Implement your client and server. Refer to [Implementation](#implementation) for instructions.
-6. open a terminal for each the client(s) and server(s) and run them with:
+6. Open a terminal for each the client(s) and server(s) and run them with:
 
     The Client: `$ go run .\client\client.go`
 
@@ -90,7 +102,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-2. Add RPC endpoints/methods to the service. The endpoint will start with "rpc" and then a name of the endpoint. We have not made them yet, but the next is the message types that we will send and then what will be returned from the call.
+2. Add RPC endpoints/methods to the service. The endpoint will start with "rpc", followed by the name of the endpoint, a message type to send and a message type to receive. We have not made the message types yet, so that will be the next thing.
 
     ```proto
     service <add a name here>
@@ -172,7 +184,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
    - Make a main method and add the following
 
-   - Listen on a port
+   - Listen on a port. If you add localhost then it is only running locally (on your computer), if you remove it, then it will open the port on your computer to others. If the port is opened then you should get a firewall prompt that you should approve to.
 
     ```go
     list, _ := net.Listen("tcp", "localhost:5400"))
@@ -206,7 +218,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 ### Calling the endpoints from client
 
-1. Make dialing options 
+1. Make dialing options with insecure credentials, as we don't have something called a TLS certificate
 
     ```go
     var opts []grpc.DialOption
@@ -219,7 +231,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     defer cancel()
     ```
 
-2. Make a context with insecure credentials, as we don't have something called a TLS certificate
+2. Dial the server. Here we just go the port locally, but if you want to connect to an other device, then you would just add the Ip of the other device. (use ``ipconfig`` in the terminal or call ``GetOutboundIP()`` which can be found in [server](/server/server.go))
 
     ```go
     conn, err := grpc.Dial(":5400", opts...)
@@ -255,33 +267,32 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 ## Prerequisites
 
-### Download proto on Windows
+### Download protoc on Windows
 
-> Feel free to ask for help if this doesn't work anymore
+1. Before starting, install google's protocol buffers:
+    - Go to this link: <https://developers.google.com/protocol-buffers/docs/downloads>
+    - Click on the "release page" link.
+    - Find the version you need and download it.
+    - As per October 2022, if your on windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
+2. Unzip the downloaded file somewhere "safe".
+    - On my windows machine, I placed it in `C:\Program Files\Protoc`
+3. Add the path of the `bin` folder to your system variables.
+    - On windows, click the windows key and search for "system", then there should come something up like "edit the system environment variables".
+    - Click the button "environment variables..." at the bottom.
+    - In the bottom list select the variable called "path" and click "edit ..."
+    - In the pop-up window, click "new..."
+    - Paste the total path to the `bin` folder into the text field.
 
-1. before starting, install google's protocol buffers:
-    - go to this link: <https://developers.google.com/protocol-buffers/docs/downloads>
-    - click on the "release page" link.
-    - find the version you need and download it.
-    - as per October 2021, if your on windows, it's the third from the bottom, `protoc-3.18.1-win64.zip`.
-2. unzip the downloaded file somewhere "safe".
-    - on my windows machine, I placed it in `C:\Program Files\Protoc`
-3. add the path to the `bin` folder to your system variables.
-    - on windows, click the windows key and search for "system", then there should come something up like "edit the system environment variables".
-    - click the button "environment variables..." at the bottom.
-    - in the bottom list select the variable called "path" and click "edit ..."
-    - in the pop-up window, click "new..."
-    - paste the total path to the `bin` folder into the text field.
+        My path is `C:\Program Files\Protoc\bin`.
 
-        my path is `C:\Program Files\Protoc\bin`.
-    - click "ok".
-4. open a terminal and run these commands:
+    - Click "ok".
+4. Open a terminal and run these commands:
 
     `$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26`
 
     `$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1`
 
-### Download proto on Mac OS
+### Download protoc on Mac OS
 
 `$ brew install go`
 
@@ -291,10 +302,12 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 `$ brew install protoc-gen-go-grpc`
 
-### MY Recommended VSCode extensions for colors
+### MY recommended VSCode extensions for colors
 
-- Linting for Go
+It can be nice with some colors so here are my favorites.
+
+- Go
     > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=golang.Go>
 
-- Linting for Proto
+- Proto
     > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3>
