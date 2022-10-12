@@ -187,7 +187,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
    - Listen on a port. If you add localhost then it is only running locally (on your computer), if you remove it, then it will open the port on your computer to others. If the port is opened then you should get a firewall prompt that you should approve to.
 
     ```go
-    list, _ := net.Listen("tcp", "localhost:5400"))
+    list, _ := net.Listen("tcp", "localhost:5400")
     ```
 
    - Make a grpc server
