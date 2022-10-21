@@ -33,7 +33,8 @@ var port = flag.String("port", "5400", "Server port")           // set with "-po
 
 func main() {
 
-	// setLog() //uncomment this line to log to a log.txt file instead of the console
+	// f := setLog() //uncomment this line to log to a log.txt file instead of the console
+	// defer f.Close()
 
 	// This parses the flags and sets the correct/given corresponding values.
 	flag.Parse()
@@ -129,7 +130,7 @@ func GetOutboundIP() net.IP {
 }
 
 // sets the logger to use a log.txt file instead of the console
-func setLog() {
+func setLog() *os.File {
 	// Clears the log.txt file when a new server is started
 	if err := os.Truncate("log.txt", 0); err != nil {
 		log.Printf("Failed to truncate: %v", err)
@@ -140,6 +141,6 @@ func setLog() {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	defer f.Close()
 	log.SetOutput(f)
+	return f
 }

@@ -30,7 +30,8 @@ func main() {
 	fmt.Println("--- CLIENT APP ---")
 
 	//log to file instead of console
-	//setLog()
+	//f := setLog()
+	//defer f.Close()
 
 	//connect to server and close the connection when program closes
 	fmt.Println("--- join Server ---")
@@ -150,11 +151,11 @@ func conReady(s gRPC.TemplateClient) bool {
 }
 
 // sets the logger to use a log.txt file instead of the console
-func setLog() {
+func setLog() *os.File {
 	f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
-	defer f.Close()
 	log.SetOutput(f)
+	return f
 }
