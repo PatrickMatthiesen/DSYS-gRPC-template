@@ -8,10 +8,14 @@
 > <https://github.com/NaddiNadja/grpc101>
 >
 > This guide is not a step by step guide and it might be a bit overcomplicated for some people. I hoped that it would be better to give more than too little.
-> The guide may hold text like "\<add a name here\>", this should be understood as take it all and replace it with a name so "\<add a name here\>" would become something like "Name".
+> The guide may hold text like `<add a name here>`, this should be understood as take it all and replace it with a name so `<add a name here>` would become something like `Name`.
+>
+> Example:
+> `rpc <Method name> (<Message name>) returns (<Response name>);`
+> Becomes `rpc SayHi (Greeting) returns (Farewell);`
 
 - [Intro](#intro)
-- [Setup of new repository](#setup-of-new-repository)
+- [Setup of a new repository](#setup-of-a-new-repository)
 - [The Proto file](#the-proto-file)
   - [What is it?](#what-is-it)
   - [Required lines](#required-lines)
@@ -22,7 +26,7 @@
 - [Prerequisites](#prerequisites)
   - [Download protoc on Windows](#download-protoc-on-windows)
   - [Download protoc on Mac OS](#download-protoc-on-mac-os)
-  - [MY recommended VSCode extensions for colors](#my-recommended-vscode-extensions-for-colors)
+  - [MY recommended VSCode extensions](#my-recommended-vscode-extensions)
 
 If you haven't installed google's protocol buffers, see the prerequisites part at the bottom.
 
@@ -30,9 +34,11 @@ If you haven't installed google's protocol buffers, see the prerequisites part a
 
 >I will complete this at a later time (TODO)
 
-You can start by following the [Setup of new repository](#setup-of-new-repository), which should show you how to start making your own repository structure and how to run the files. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, then try to compare it to the working code example in this repository.
+This guide assumes that you at least have downloaded go.
 
-## Setup of new repository
+You can start by following the [Setup of new repository](#setup-of-a-new-repository), which should show you how to start making your own repository structure and how to run the different things. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, then try to compare it to the working code example in this repository. I would very much appreciate feedback if you have any 🙂.
+
+## Setup of a new repository
 
 1. Make ``go.mod`` file with:
 
@@ -51,7 +57,7 @@ You can start by following the [Setup of new repository](#setup-of-new-repositor
     protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto
     ```
 
-    The command should create the **two** ``pb.go`` files. Remember to change "proto/template" to your directory and file name.
+    The command should create the **two** ``.pb.go`` files. Remember to change "proto/template" to your directory and file name.
 4. Run command:
 
     ```sh
@@ -76,67 +82,83 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 1. To make sure to use the newer proto syntax that, then you will need to add the syntax as the first line in the file.
 
-   ```proto
+   ```protobuf
     syntax = "proto3";
    ```
 
 2. A path for the compiler to know what the package name of the pb.go files needs to have, then an option go_package will need to be set. It is gonna use the last part of the path as the name of the package, but it matters little, it just needs to be unique. The example below will make the package name "proto"
 
-    ```proto
+    ```protobuf
     option go_package = "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto";
     ```
 
 3. Add a package name that is the same as the last folder from above ("proto" in this example)
 
-    ```proto
+    ```protobuf
     package proto;
     ```
 
 ### Defining a service
 
-1. Make a service with a telling name.
+1. Make a service with a telling name. Here the name of the service is `Template`, its a bad name but it is a name.
 
-    ```proto
-    service <add a name here>
+    ```protobuf
+    service Template
     {
     }
     ```
 
-2. Add RPC endpoints/methods to the service. The endpoint will start with "rpc", followed by the name of the endpoint, a message type to send and a message type to receive. We have not made the message types yet, so that will be the next thing.
+2. Add RPC endpoints/methods to the service. The endpoint will start with "rpc", followed by the name of the endpoint, a message type to send and a message type to receive. We have not made the message types yet, but we will do that next.
 
-    ```proto
-    service <add a name here>
+   Here we make an endpoint called `SayHi`, which sends a message type called `Greeting` and expects to receive a response of a type called `Farewell`.
+
+    ```protobuf
+    service Template
     {
-        rpc <Method name> (<Message name>) returns (<Response name>);
+        rpc SayHi (Greeting) returns (Farewell);
     }
     ```
 
-    A endpoint can also be streamed, so more than one message or response can be sent. You can add it to just one or both. Here is an example that does it to both:
+    A endpoint can also be streamed, so more than one message or response can be sent. You can add it either the message or responce, or both if you need. Here is an example that does it to both:
 
-     ```proto
-        rpc <endpoint name> (stream <Message name>) returns (stream <Response name>);
+     ```protobuf
+        rpc SayHi (stream Greeting) returns (stream Farewell);
     ```
 
 3. To complete the endpoint we need to make the message types.
 
-    ```proto
-    message <Message type> {
-        <type> <variable> = 1;
-        <type> <variable> = 2;
+    ```protobuf
+    message Greeting {
+        string clientName = 1;
+        string message = 2;
         ...
+    }
+
+    message Farewell {
+        string message = 1;
     }
     ```
 
-- notes:
-  - All names of services, endpoints and message types should be in CamelCase
-  - an example can be found in [template.proto](proto/template.proto)
+   - notes:
+     - All names of services, endpoints and message types should be in CamelCase
+     - an example can be found in [template.proto](proto/template.proto)
+
+4. Now that we have defined our service we want to compile the go files. We do so by running the following command:
+
+   ```sh
+   protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto
+   ```
+
+   > remember to change the path `proto/template.proto` to the path of your proto file.
 
 ## Implementation
+
+For this section we go over how to implement the server and client parts of the service you created in [Defining a service](#defining-a-service). This guide shows how to make a client-server architecture, but this guide will not show how to do a client to client architecture.
 
 ### Implementing the server methods
 
 1. Make a "server" struct
-   - It does not need to be called server, but its just what makes sense.
+   - It does not need to be called server, but its just what makes the most sense in this case.
 
     ```go
     type Server struct {
@@ -147,7 +169,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-2. Make a method that matches the endpoint in your proto file. To do this you need to give your struct the method. This is done by adding the "(s *Server)" part as in the examples below.
+2. Make a method that matches the endpoint in your proto file and add `(s *Server)`. This attaches the method to the server struct so it can run when someone calls our endpoint.
    - For an endpoint that does no streaming, then we need to give the method a context and the input type. For the return we need to return a pair of your return type and an error.
 
     ```go
@@ -159,7 +181,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-    - For an endpoint that streams messages, then we need to give the method a stream and return an error.
+    - For an endpoint that streams messages we need to give the method a stream and return an error.
     - In this case you get the input from the stream and send the return type back over the stream too.
 
     ```go
@@ -171,7 +193,6 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
                 break
             }
         }
-
 
         ack := // make an instance of your return type
         msgStream.SendAndClose(ack)
@@ -218,7 +239,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 ### Calling the endpoints from client
 
-1. Make dialing options with insecure credentials, as we don't have something called a TLS certificate
+1. Make dialing options with insecure credentials, as we don't have something called a TLS certificate (which is used for encryption).
 
     ```go
     var opts []grpc.DialOption
@@ -270,27 +291,27 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 ### Download protoc on Windows
 
 1. Before starting, install google's protocol buffers:
-    - Go to this link: <https://developers.google.com/protocol-buffers/docs/downloads>
-    - Click on the "release page" link.
+    - Go to the latest release of the protobuf repository: <https://github.com/protocolbuffers/protobuf/releases/latest>
     - Find the version you need and download it.
-    - As per October 2022, if your on windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
-2. Unzip the downloaded file somewhere "safe".
-    - On my windows machine, I placed it in `C:\Program Files\Protoc`
+    - As per July 2023, if your on windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
+2. Unzip the file and place it in a folder you wont move or delete.
+    - On my windows machine, I placed it in `C:\Users\<username>\go`
+    - I chose to rename the folder to `Protoc`, so the path of the folder is `C:\Users\<username>\go\Protoc`
 3. Add the path of the `bin` folder to your system variables.
-    - On windows, click the windows key and search for "system", then there should come something up like "edit the system environment variables".
-    - Click the button "environment variables..." at the bottom.
-    - In the bottom list select the variable called "path" and click "edit ..."
-    - In the pop-up window, click "new..."
-    - Paste the total path to the `bin` folder into the text field.
+    - On windows, press the windows key and search for `edit the system environment variables`.
+    - Click on `Environment Variables...` at the bottom.
+    - In the bottom list select the variable called `Path` and click on `Edit ...`
+    - In the pop-up window, click on `New`
+    - Paste the full path of the `bin` folder into the text field.
 
-        My path is `C:\Program Files\Protoc\bin`.
+        My path is `C:\Users\<username>\go\Protoc\bin`.
 
-    - Click "ok".
-4. Open a terminal and run these commands:
+    - Click `OK` twice.
+4. Open a terminal and run the following commands:
 
-    `$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26`
+    `$ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest`
 
-    `$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1`
+    `$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest`
 
 ### Download protoc on Mac OS
 
@@ -302,12 +323,12 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 `$ brew install protoc-gen-go-grpc`
 
-### MY recommended VSCode extensions for colors
+### MY recommended VSCode extensions
 
 It can be nice with some colors so here are my favorites.
 
-- Go
-    > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=golang.Go>
+- Go language support
+    > vscode-proto3: <https://marketplace.visualstudio.com/items?itemName=golang.Go>
 
-- Proto
-    > VS Marketplace Link: <https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3>
+- Proto file syntax highlighting
+    > vscode-proto3: <https://marketplace.visualstudio.com/items?itemName=zxh404.vscode-proto3>

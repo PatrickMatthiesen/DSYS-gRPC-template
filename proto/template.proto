@@ -12,14 +12,14 @@ package proto;
 // you can call it whatever you want
 service Template
 {
-    //one message is sent and one is recieved
+    // one message is sent and one is recieved
     rpc Increment (Amount) returns (Ack);
 
     // many messages are sent and one is recieved
     rpc SayHi (stream Greeding) returns (Farewell);
 }
 
-//Amount is a type containing a string and int. They are intialized as the first and second parameter value.
+// Amount is a type containing a string and int. They are intialized as the first and second parameter value.
 message Amount {
     string clientName = 1;
     int64 value = 2;
