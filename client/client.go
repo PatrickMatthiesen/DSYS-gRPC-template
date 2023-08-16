@@ -48,8 +48,10 @@ func ConnectToServer() {
 	//dial options
 	//the server is not using TLS, so we use insecure credentials
 	//(should be fine for local testing but not in the real world)
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	opts := []grpc.DialOption {
+		grpc.WithBlock(), 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
 
 	//dial the server, with the flag "server", to get a connection to it
 	log.Printf("client %s: Attempts to dial on port %s\n", *clientsName, *serverPort)
