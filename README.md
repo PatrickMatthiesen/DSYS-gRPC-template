@@ -22,7 +22,7 @@
   - [Defining a service](#defining-a-service)
 - [Implementation](#implementation)
   - [Implementing the server methods](#implementing-the-server-methods)
-  - [Calling the endpoints from client](#calling-the-endpoints-from-client)
+  - [Calling endpoints from the client](#calling-endpoints-from-the-client)
 - [Prerequisites](#prerequisites)
   - [Download protoc on Windows](#download-protoc-on-windows)
   - [Download protoc on Mac OS](#download-protoc-on-mac-os)
@@ -66,7 +66,7 @@ You can start by following the [Setup of new repository](#setup-of-a-new-reposit
 
     to install dependencies and create the ``go.sum`` file.
 5. Implement your client and server. Refer to [Implementation](#implementation) for instructions.
-6. Open a terminal for each the client(s) and server(s) and run them with:
+6. Open a terminal for each client and server and run them with:
 
     The Client: `$ go run .\client\client.go`
 
@@ -80,7 +80,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 ### Required lines
 
-1. To make sure to use the newer proto syntax that, then you will need to add the syntax as the first line in the file.
+1. To make sure to use the newer proto syntax, you will need to add the syntax as the first line in the file.
 
    ```protobuf
     syntax = "proto3";
@@ -100,7 +100,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
 
 ### Defining a service
 
-1. Make a service with a telling name. Here the name of the service is `Template`, its a bad name but it is a name.
+1. Make a service with a telling name. Here the name of the service is `Template`, It's a bad name but it is a name.
 
     ```protobuf
     service Template
@@ -108,7 +108,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-2. Add RPC endpoints/methods to the service. The endpoint will start with "rpc", followed by the name of the endpoint, a message type to send and a message type to receive. We have not made the message types yet, but we will do that next.
+2. Add RPC endpoints/methods to the service. The endpoint will start with `rpc`, followed by the name of the endpoint, a message type to send, and a message type to receive. We have not made the message types yet, but we will do that next.
 
    Here we make an endpoint called `SayHi`, which sends a message type called `Greeting` and expects to receive a response of a type called `Farewell`.
 
@@ -119,7 +119,7 @@ The proto file is a file that is used to compile methods for the actual gRPC. So
     }
     ```
 
-    A endpoint can also be streamed, so more than one message or response can be sent. You can add it either the message or responce, or both if you need. Here is an example that does it to both:
+    An endpoint can also be streamed, so more than one message or response can be sent. You can add either the message or response, or both if you need. Here is an example that does it to both:
 
      ```protobuf
         rpc SayHi (stream Greeting) returns (stream Farewell);
@@ -181,8 +181,7 @@ For this section we go over how to implement the server and client parts of the 
     }
     ```
 
-    - For an endpoint that streams messages we need to give the method a stream and return an error.
-    - In this case you get the input from the stream and send the return type back over the stream too.
+    - For an endpoint that streams messages, we need to give the method a stream and return an error. In this case, you get the input from the stream and send the return type back over the stream too.
 
     ```go
     func (s *Server) <endpoint name>(msgStream gRPC.<service name>_<endpoint name>Server) error {
@@ -205,7 +204,7 @@ For this section we go over how to implement the server and client parts of the 
 
    - Make a main method and add the following
 
-   - Listen on a port. If you add localhost then it is only running locally (on your computer), if you remove it, then it will open the port on your computer to others. If the port is opened then you should get a firewall prompt that you should approve to.
+   - Listen on a port. If you add localhost then it is only running locally (on your computer), if you remove it, then it will open the port on your computer to others. If the port is opened then you should get a firewall prompt that you should approve.
 
     ```go
     list, _ := net.Listen("tcp", "localhost:5400")
@@ -237,7 +236,7 @@ For this section we go over how to implement the server and client parts of the 
     grpcServer.Serve(list)
     ```
 
-### Calling the endpoints from client
+### Calling endpoints from the client
 
 1. Make dialing options with insecure credentials, as we don't have something called a TLS certificate (which is used for encryption).
 
@@ -252,7 +251,7 @@ For this section we go over how to implement the server and client parts of the 
     defer cancel()
     ```
 
-2. Dial the server. Here we just go the port locally, but if you want to connect to an other device, then you would just add the Ip of the other device. (use ``ipconfig`` in the terminal or call ``GetOutboundIP()`` which can be found in [server](/server/server.go))
+2. Dial the server. Here we just go the port locally, but if you want to connect to another device, then you would just add the IP of the other device. (use ``ipconfig`` in the terminal or call ``GetOutboundIP()`` which can be found in [server](/server/server.go))
 
     ```go
     conn, err := grpc.Dial(":5400", opts...)
@@ -280,7 +279,7 @@ For this section we go over how to implement the server and client parts of the 
     stream.Send(message)
     ```
 
-    - When done sending messages, then you need to close the stream and wait for a response from the server.
+    - When done sending messages, you need to close the stream and wait for a response from the server.
 
     ```go
     farewell, err := stream.CloseAndRecv()
@@ -290,15 +289,15 @@ For this section we go over how to implement the server and client parts of the 
 
 ### Download protoc on Windows
 
-1. Before starting, install google's protocol buffers:
+1. Before starting, install Google's protocol buffers:
     - Go to the latest release of the protobuf repository: <https://github.com/protocolbuffers/protobuf/releases/latest>
-    - Find the version you need and download it.
-    - As per July 2023, if your on windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
-2. Unzip the file and place it in a folder you wont move or delete.
-    - On my windows machine, I placed it in `C:\Users\<username>\go`
+    - Find the version you need and download it. 
+    - As of July 2023, if you are on Windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
+2. Unzip the file and place it in a folder you won't move or delete.
+    - On my Windows machine, I placed it in `C:\Users\<username>\go`
     - I chose to rename the folder to `Protoc`, so the path of the folder is `C:\Users\<username>\go\Protoc`
 3. Add the path of the `bin` folder to your system variables.
-    - On windows, press the windows key and search for `edit the system environment variables`.
+    - On Windows, press the Windows key and search for `edit the system environment variables`.
     - Click on `Environment Variables...` at the bottom.
     - In the bottom list select the variable called `Path` and click on `Edit ...`
     - In the pop-up window, click on `New`
