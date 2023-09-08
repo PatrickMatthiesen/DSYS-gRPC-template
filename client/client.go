@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 
+	// this has to be the same as the go.mod module,
+	// followed by the path to the folder the proto file is in.
 	gRPC "github.com/PatrickMatthiesen/DSYS-gRPC-template/proto"
 
 	"google.golang.org/grpc"
