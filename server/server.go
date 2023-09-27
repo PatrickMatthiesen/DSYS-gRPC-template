@@ -40,7 +40,7 @@ func main() {
 	flag.Parse()
 	fmt.Println(".:server is starting:.")
 
-	// starts a goroutine executing the launchServer method.
+	// launch the server
 	launchServer()
 
 	// code here is unreachable because launchServer occupies the current thread.

@@ -7,6 +7,9 @@
 > An older version of this guide can be found at:
 > <https://github.com/NaddiNadja/grpc101>
 >
+> The one from the walkthrough can be found at:
+> <https://github.com/Mai-Sigurd/grpcTimeRequestExample>
+>
 > The guide may hold text like `<add a name here>`, this should be understood as take it all and replace it with a name so `<add a name here>` would become something like `Name`.
 >
 > Example:
@@ -24,6 +27,8 @@
 - [Implementation](#implementation)
   - [Implementing the server methods](#implementing-the-server-methods)
   - [Calling endpoints from the client](#calling-endpoints-from-the-client)
+- [Code Snippets](#code-snippets)
+  - [Log to a file](#log-to-a-file)
 - [Prerequisites](#prerequisites)
   - [Download protoc on Windows](#download-protoc-on-windows)
   - [Download protoc on Mac OS](#download-protoc-on-mac-os)
@@ -35,7 +40,7 @@
 
 If you haven't installed Google's protocol buffers, see the [prerequisites](#prerequisites) part at the bottom before continuing.
 
-When you have protoc downloaded, you can start by following the [Setup of a new repository](#setup-of-a-new-repository), which should show you how to start making your repository structure and how to run the different things. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, then try to compare it to the working code example in this repository or ask for help. I would very much appreciate feedback if you have any 🙂.
+When you have protoc downloaded, you can start by following the [Setup of a new repository](#setup-of-a-new-repository), which should show you how to start making your repository structure and how to run the different things. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, you can compare your code to the working code example in this repository or ask for help. I would very much appreciate feedback if you have any 🙂.
 
 ## Setup of a new repository
 
@@ -77,11 +82,11 @@ When you have protoc downloaded, you can start by following the [Setup of a new 
 
 ### What is it?
 
-The proto file defines a standard of communication. For us proto will be used to define the way we communicate between our servers and clients. We can use the proto file to compile methods for us to use in our code. So if you make changes in the proto file, then you will have to recompile it, before you can see any changes in your code.
+The proto file defines a standard of communication, aka. a protocol. For us proto will be used to define the way we communicate between our servers and clients. We can use the proto file to compile methods for us to use in our code. So if you make changes in the proto file, then you will have to recompile it, before you can see any changes in your code.
 
 ### Required lines
 
-1. To make sure to use the newer proto syntax, you will need to add the syntax as the first line in the file.
+1. To make sure to use the newer proto syntax, you will need to add the syntax version as the first line in the file.
 
    ```protobuf
     syntax = "proto3";
@@ -329,13 +334,43 @@ For this section, we go over how to implement the server and client parts of the
     farewell, err := stream.CloseAndRecv()
     ```
 
+## Code Snippets
+
+For later weeks you might need some of the following snippets for the assignments.
+
+### Log to a file
+
+The following code can be used to log to a file instead of the console.
+You can use it by calling `f := setLog()` in the main method, just remember to call `defer f.Close()` after it.
+
+> what is `defer`: <https://gobyexample.com/defer>
+
+```go
+    // sets the logger to use a log.txt file instead of the console
+    func setLog() *os.File {
+        // Clears the log.txt file when a new server is started
+        if err := os.Truncate("log.txt", 0); err != nil {
+            log.Printf("Failed to truncate: %v", err)
+        }
+
+        // This connects to the log file/changes the output of the log informaiton to the log.txt file.
+        f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+        if err != nil {
+            log.Fatalf("error opening file: %v", err)
+        }
+        log.SetOutput(f)
+        return f
+    }
+```
+
+
 ## Prerequisites
 
 ### Download protoc on Windows
 
 1. Before starting, install Google's protocol buffers:
     - Go to the latest release of the protobuf repository: <https://github.com/protocolbuffers/protobuf/releases/latest>
-    - Find the version you need and download it. 
+    - Find the version you need and download it.
     - As of July 2023, if you are on Windows, it's the third from the bottom, `protoc-21.7-win64.zip`.
 2. Unzip the file and place it in a folder you won't move or delete.
     - On my Windows machine, I placed it in `C:\Users\<username>\go`
