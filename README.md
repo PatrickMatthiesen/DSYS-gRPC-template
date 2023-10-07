@@ -101,7 +101,7 @@ The proto file defines a standard of communication, aka. a protocol. For us prot
     or
 
     ```protobuf
-    option go_package = "proto";
+    option go_package = "something/proto";
     ```
 
 3. Add a package name that is the same as the last folder from above ("proto" in this example)
