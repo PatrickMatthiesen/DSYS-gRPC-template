@@ -38,9 +38,9 @@
 
 > This guide assumes that you at least have downloaded go.
 
-If you haven't installed Google's protocol buffers, see the [prerequisites](#prerequisites) part at the bottom before continuing.
+If you haven't installed Google's protocol buffer compiler (protoc), see the [prerequisites](#prerequisites) at the bottom before continuing.
 
-When you have protoc downloaded, you can start by following the [Setup of a new repository](#setup-of-a-new-repository), which should show you how to start making your repository structure and how to run the different things. While setting up your repository, make sure to go to the appropriate sections explaining the basics of what to do in each of the files. If the sections don't explain it well enough, you can compare your code to the working code example in this repository or ask for help. I would very much appreciate feedback if you have any 🙂.
+When you have protoc downloaded, you can start by following the [Setup of a new repository](#setup-of-a-new-repository), which should show you how to start making your repository structure and how to run the different things. While setting up your repository, go to the appropriate sections explaining the basics of what to do in each file. If the sections don't explain it well enough, you can compare your code to the working code example in this repository or ask for help. I would very much appreciate feedback if you have any 🙂.
 
 ## Setup of a new repository
 
@@ -51,7 +51,7 @@ When you have protoc downloaded, you can start by following the [Setup of a new 
     ```
 
     Your repo should be on the public GitHub as it needs to be an accessible web page.
-    > If you don't want to use a GitHub repository to keep it simple but differ from the standard, you can just call it something like `incrementer.com`, as that would fit the name of this example.
+    > If you don't want to use a GitHub repository to keep it simple but differ from the standard, you can call it something like `incrementer.com`, as that would fit the name of this example.
 
 2. Make a ``.proto`` file in a sub-directory, for example, ``proto/template.proto``, and make your service. See [The Proto file](#the-proto-file) for info on what to add to the `.proto` file
 
@@ -71,7 +71,7 @@ When you have protoc downloaded, you can start by following the [Setup of a new 
 
     To install dependencies and create the ``go.sum`` file.
 
-5. Implement your client and server. Refer to [Implementation](#implementation) for instructions.
+5. Implement your client and server. Take a look at [Implementation](#implementation) for instructions.
 6. Open a terminal for each client and server and run them with:
 
     The Client: `$ go run .\client\client.go`
@@ -193,7 +193,7 @@ For this section, we go over how to implement the server and client parts of the
         // an interface that the server type needs to have
         gRPC.UnimplementedTemplateServer
         
-        // here you can impliment other fields that you want
+        // here you can implement other fields that you want
     }
     ```
 
@@ -281,7 +281,7 @@ For this section, we go over how to implement the server and client parts of the
     ```go
     import (
         ...
-        // this has to be the same as the go.mod module,
+        // This has to be the same as the go.mod module,
         // followed by the path to the folder the proto file is in.
         gRPC "<your go.mod module path>/proto"
 
@@ -343,7 +343,7 @@ For later weeks you might need some of the following snippets for the assignment
 The following code can be used to log to a file instead of the console.
 You can use it by calling `f := setLog()` in the main method, just remember to call `defer f.Close()` after it.
 
-> what is `defer`: <https://gobyexample.com/defer>
+> Don't know `defer`? Check out this sample: <https://gobyexample.com/defer>
 
 ```go
     // sets the logger to use a log.txt file instead of the console
@@ -353,7 +353,7 @@ You can use it by calling `f := setLog()` in the main method, just remember to c
             log.Printf("Failed to truncate: %v", err)
         }
 
-        // This connects to the log file/changes the output of the log informaiton to the log.txt file.
+        // This connects to the log file/changes the output of the log information to the log.txt file.
         f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
         if err != nil {
             log.Fatalf("error opening file: %v", err)
