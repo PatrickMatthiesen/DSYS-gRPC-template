@@ -51,9 +51,9 @@ When you have protoc downloaded, you can start by following the [Setup of a new 
     ```
 
     Your repo should be on the public GitHub as it needs to be an accessible web page.
-    > If you don't want to use a GitHub repository to keep it simple but differ from the standard, you can call it something like `incrementer.com`, as that would fit the name of this example.
+    > If you don't want to use a GitHub repository, you can keep it simple but differ from the standard. Then you can call it something like `incrementer.com`, as that would fit the name of this example.
 
-2. Make a ``.proto`` file in a sub-directory, for example, ``proto/template.proto``, and make your service. See [The Proto file](#the-proto-file) for info on what to add to the `.proto` file
+2. Make a ``.proto`` file in a sub-directory, for example, ``proto/template.proto``, and define your service. See [The Proto file](#the-proto-file) for info on what to add to the `.proto` file
 
 3. Run command:
 
@@ -164,7 +164,7 @@ The proto file defines a standard of communication, aka. a protocol. For us prot
    protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/template.proto
    ```
 
-   > remember to change the path `proto/template.proto` to the path of your proto file.
+   > Remember to change the path `proto/template.proto` to the path of your proto file.
 
 ## Implementation
 
@@ -177,7 +177,7 @@ For this section, we go over how to implement the server and client parts of the
     ```go
     import (
         ...
-        // this has to be the same as the go.mod module,
+        // This has to be the same as the go.mod module,
         // followed by the path to the folder the proto file is in.
         gRPC "<your go.mod module path>/proto"
 
